@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * Service class for task business logic
  */
@@ -33,8 +35,14 @@ public class TaskService {
     }
 
     /**
-     *
+     * Retrieve a task by ID
      */
+    public Optional<TaskResponseDto> getTaskById(Long id){
+        log.debug("Retrieving task with ID: {}", id);
+        return taskRepository.findById(id)
+                .map(taskMapper::toResponseDto);
+
+    }
 
 
 }
