@@ -1,6 +1,7 @@
 package com.example.hmcts.features.tasks;
 
 import com.example.hmcts.shared.domain.Task;
+import com.example.hmcts.shared.domain.TaskStatus;
 import com.example.hmcts.shared.dto.TaskRequestDto;
 import com.example.hmcts.shared.dto.TaskResponseDto;
 import com.example.hmcts.shared.mapper.TaskMapper;
@@ -69,7 +70,21 @@ public class TaskService {
         Task savedTask = taskRepository.save(existingTask);
         return taskMapper.toResponseDto(savedTask);
 
+    }
 
+    /**
+     * Update a status
+     */
+
+    public TaskResponseDto updateTaskStatus(Long id, TaskStatus status){
+        log.info("Updating task {} status to {}", id, status);
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("task not found with id: " + id));
+
+        task.setStatus(status);
+
+        Task savedTasked = taskRepository.save(task);
+        return taskMapper.toResponseDto(savedTasked);
 
     }
 
