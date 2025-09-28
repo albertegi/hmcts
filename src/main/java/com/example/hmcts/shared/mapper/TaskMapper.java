@@ -3,7 +3,9 @@ package com.example.hmcts.shared.mapper;
 import com.example.hmcts.shared.domain.Task;
 import com.example.hmcts.shared.dto.TaskRequestDto;
 import com.example.hmcts.shared.dto.TaskResponseDto;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TaskMapper {
 
     /**

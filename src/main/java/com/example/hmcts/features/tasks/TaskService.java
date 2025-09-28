@@ -4,12 +4,14 @@ import com.example.hmcts.shared.domain.Task;
 import com.example.hmcts.shared.dto.TaskRequestDto;
 import com.example.hmcts.shared.dto.TaskResponseDto;
 import com.example.hmcts.shared.mapper.TaskMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for task business logic
@@ -37,11 +39,22 @@ public class TaskService {
     /**
      * Retrieve a task by ID
      */
+    @Transactional(readOnly = true)
     public Optional<TaskResponseDto> getTaskById(Long id){
         log.debug("Retrieving task with ID: {}", id);
         return taskRepository.findById(id)
                 .map(taskMapper::toResponseDto);
+    }
 
+    /**
+     * Retrieve all tasks
+     */
+    public List<TaskResponseDto> getAllTasks(){
+        log.debug("Retrieving all tasks");
+        return taskRepository.findAll()
+                .stream()
+                .map(taskMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
 
