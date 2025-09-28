@@ -63,7 +63,13 @@ public class TaskService {
     public TaskResponseDto updateTask(Long id, TaskRequestDto taskRequestDto){
         log.info("Updating task: {}", id);
         Task existingTask = taskRepository.findById(id)
-                .orElseThrow(new TaskNotFoundException("Task not found with id: " + id));
+                .orElseThrow(() -> new TaskNotFoundException("Task not found with id:" + id));
+
+        taskMapper.updateEntityFromDto(existingTask, taskRequestDto);
+        Task savedTask = taskRepository.save(existingTask);
+        return taskMapper.toResponseDto(savedTask);
+
+
 
     }
 
