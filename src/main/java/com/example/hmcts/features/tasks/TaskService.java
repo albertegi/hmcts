@@ -57,5 +57,15 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     *  Update a task
+     */
+    public TaskResponseDto updateTask(Long id, TaskRequestDto taskRequestDto){
+        log.info("Updating task: {}", id);
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(new TaskNotFoundException("Task not found with id: " + id));
+
+    }
+
 
 }
