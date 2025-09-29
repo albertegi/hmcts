@@ -1,5 +1,6 @@
 package com.example.hmcts.features.tasks;
 
+import com.example.hmcts.shared.domain.TaskStatus;
 import com.example.hmcts.shared.dto.TaskRequestDto;
 import com.example.hmcts.shared.dto.TaskResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -89,6 +90,27 @@ public class TaskController {
         log.info("Updating task {}", id);
         try{
             TaskResponseDto updatedTask = taskService.updateTask(id, taskRequestDto);
+            return ResponseEntity.ok(updatedTask);
+        } catch (TaskNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Update task status via REST API.
+     */
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Update task status", description = "Updates the status of a task")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Task status updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
+    })
+    public ResponseEntity<TaskResponseDto> updateTaskStatus(
+            @Parameter(description = "Task ID") @PathVariable Long id,
+            @Parameter(description = "New status") @RequestParam TaskStatus status) {
+        log.info("Updating task status via REST API: {} to {}", id, status);
+        try {
+            TaskResponseDto updatedTask = taskService.updateTaskStatus(id, status);
             return ResponseEntity.ok(updatedTask);
         } catch (TaskNotFoundException e) {
             return ResponseEntity.notFound().build();
