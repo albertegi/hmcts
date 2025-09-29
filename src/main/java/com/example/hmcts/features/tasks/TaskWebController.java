@@ -164,6 +164,29 @@ public class TaskWebController {
         return "redirect:/tasks";
     }
 
+    /**
+     * Update task status
+     */
+    @PostMapping("/{id}/status")
+    public String updateTask(@PathVariable Long id,
+                             @RequestParam TaskStatus status,
+                             RedirectAttributes redirectAttributes){
+        log.info("Updating task {} status to {}", id, status);
+
+        try{
+            taskService.updateTaskStatus(id, status);
+            redirectAttributes.addFlashAttribute("successMessage", "Task status updated successfully");
+        } catch (TaskNotFoundException e) {
+            log.warn("Task not found for status update: {}", id);
+            redirectAttributes.addFlashAttribute("errorMessage", "Task not found");
+        } catch (Exception e) {
+            log.error("Error updating task status", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating task status: " + e.getMessage());
+        }
+
+        return "redirect:/tasks";
+    }
+
 
 
 
