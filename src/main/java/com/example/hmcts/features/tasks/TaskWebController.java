@@ -5,15 +5,13 @@ import com.example.hmcts.shared.domain.TaskStatus;
 import com.example.hmcts.shared.dto.TaskRequestDto;
 import com.example.hmcts.shared.dto.TaskResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -88,6 +86,7 @@ public class TaskWebController {
     /**
      * Display task edit form
      */
+    @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes){
         log.info("Showing edit form for task: {}", id);
 
@@ -105,6 +104,77 @@ public class TaskWebController {
             return "redirect:/tasks";
         }
     }
+
+    /**
+     * Update a task
+     */
+    @PostMapping("/{id}")
+    public String updateTask(@PathVariable Long id,
+                             @Valid @ModelAttribute("taskRequestDto") TaskRequestDto taskRequestDto,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes,
+                             Model model){
+        log.info("Updating task: {}", id);
+
+        // validation for status field
+        if(taskRequestDto.getStatus() == null){
+            bindingResult.rejectValue("status", "NotNull", "Status is required");
+        }
+
+        if(bindingResult.hasErrors()){
+            log.warn("Validation errors in task update: {} ", bindingResult.getAllErrors());
+            model.addAttribute("taskId", id);
+            model.addAttribute("taskStatuses", TaskStatus.values());
+            return "tasks/form";
+        }
+
+        try{
+            taskService.updateTask(id, taskRequestDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Task updated successfully");
+            return "redirect:/tasks";
+        } catch (TaskNotFoundException e) {
+            log.warn("Task not found for update: {}", id);
+            redirectAttributes.addFlashAttribute("errorMessage", "Task not found");
+            return "redirect:/tasks";
+        } catch (Exception e) {
+            log.error("Error updating task", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error updating task: " + e.getMessage());
+            return "redirect:/tasks/" + id + "/edit";
+        }
+    }
+
+    /**
+     * Delete a task.
+     */
+    @PostMapping("/{id}/delete")
+    public String deleteTask(@PathVariable Long id, RedirectAttributes redirectAttributes){
+        log.info("Deleting task: {}", id);
+
+        try{
+            taskService.deleteTask(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Task deleted successfully");
+        } catch (TaskNotFoundException e) {
+            log.warn("Task not found for deletion: {}", id);
+            redirectAttributes.addFlashAttribute("errorMessage", "Task not found");
+        } catch (Exception e) {
+            log.error("Error deleting task", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting task:" + e.getMessage());
+        }
+
+        return "redirect:/tasks";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Convert TaskResponseDto to TaskRequestDto for form editing
