@@ -73,8 +73,45 @@ public class TaskController {
     }
 
     /**
-     * Update task
+     * Update a task
      */
+    @PutMapping("/{id}")
+    @Operation(summary = "Update task", description = "Updates a task with new details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Task updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid task data")
+    })
+    public ResponseEntity<TaskResponseDto> updateTask(
+            @Parameter(description = "Task ID") @PathVariable Long id,
+            @Valid @RequestBody TaskRequestDto taskRequestDto
+    ){
+        log.info("Updating task {}", id);
+        try{
+            TaskResponseDto updatedTask = taskService.updateTask(id, taskRequestDto);
+            return ResponseEntity.ok(updatedTask);
+        } catch (TaskNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Delete a task
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@Parameter(description = "Task ID") @PathVariable Long id){
+        log.info("Deleting task..");
+        try{
+            taskService.deleteTask(id);
+            return ResponseEntity.noContent().build();
+        } catch (TaskNotFoundException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+
+
+
 }
 
 
