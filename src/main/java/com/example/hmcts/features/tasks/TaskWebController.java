@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -82,6 +83,43 @@ public class TaskWebController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating task: " + e.getMessage());
             return "redirect:/tasks/new";
         }
+    }
+
+    /**
+     * Display task edit form
+     */
+    public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes){
+        log.info("Showing edit form for task: {}", id);
+
+        try{
+            TaskResponseDto taskResponseDto = taskService.getTaskById(id)
+                    .orElseThrow(() -> new TaskNotFoundException("Task not found with id: " + id));
+            TaskRequestDto taskRequestDto = convertResponseDtoToRequestDto(taskResponseDto);
+            model.addAttribute("taskRequestDto", taskRequestDto);
+            model.addAttribute("taskId", id);
+            model.addAttribute("taskStatuses", TaskStatus.values());
+            return "task/form";
+        } catch (TaskNotFoundException e) {
+            log.warn("Task not found: {} ", id);
+            redirectAttributes.addFlashAttribute("errorMessage", "Task not found");
+            return "redirect:/tasks";
+        }
+    }
+
+    /**
+     * Convert TaskResponseDto to TaskRequestDto for form editing
+     */
+    private TaskRequestDto convertResponseDtoToRequestDto(TaskResponseDto dto){
+        if(dto == null){
+            return null;
+        }
+
+        return TaskRequestDto.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .status(dto.getStatus())
+                .dueDate(dto.getDueDate())
+                .build();
     }
 
 
