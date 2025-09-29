@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class TaskWebController {
     /**
      * Display all tasks
      */
+    @GetMapping
     public String getAllTasks(Model model){
         log.info("Displaying all tasks");
         List<TaskResponseDto> tasks = taskService.getAllTasks();
@@ -34,6 +36,19 @@ public class TaskWebController {
         model.addAttribute("taskStatuses", TaskStatus.values());
         return "tasks/list";
     }
+
+    /**
+     * Display task creation form
+     */
+    @GetMapping("/new")
+    public String showCreateForm(Model model){
+        log.info("Showing task creation form");
+        TaskRequestDto taskRequestDto = TaskRequestDto.builder().status(TaskStatus.PENDING).build();
+        model.addAttribute("taskRequestDto", taskRequestDto);
+        model.addAttribute("taskStatuses", TaskStatus.values());
+        return "task/form";
+    }
+
 
 
 }
