@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,6 +50,38 @@ public class TaskWebController {
         model.addAttribute("taskRequestDto", taskRequestDto);
         model.addAttribute("taskStatuses", TaskStatus.values());
         return "task/form";
+    }
+
+    /**
+     * create a new task
+     */
+    @PostMapping
+    public String createTask(TaskRequestDto taskRequestDto,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes,
+                             Model model){
+        log.info("Creating new task: {}", taskRequestDto.getTitle());
+
+        // validation for status field
+        if(taskRequestDto.getStatus() == null){
+            bindingResult.rejectValue("status", "NotNull", "Status is required");
+        }
+
+        if(bindingResult.hasErrors()){
+            log.warn("Validation errors in task creation: {} ", bindingResult.getAllErrors());
+            model.addAttribute("taskStatuses", TaskStatus.values());
+            return "task/form";
+        }
+
+        try{
+            taskService.createTask(taskRequestDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Task created successfully");
+            return "redirect:/tasks";
+        } catch (Exception e) {
+            log.error("Error creating task", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating task: " + e.getMessage());
+            return "redirect:/tasks/new";
+        }
     }
 
 
