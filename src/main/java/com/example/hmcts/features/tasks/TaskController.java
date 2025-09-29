@@ -99,6 +99,11 @@ public class TaskController {
      * Delete a task
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete Task", description = "Deletes a task by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
+    })
     public ResponseEntity<Void> deleteTask(@Parameter(description = "Task ID") @PathVariable Long id){
         log.info("Deleting task..");
         try{
