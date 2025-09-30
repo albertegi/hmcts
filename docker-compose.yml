@@ -1,0 +1,39 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hmcts-postgres
+    environment:
+      POSTGRES_DB: hmcts_db
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hmcts-network
+
+  # Spring Boot Application
+  hmcts-app:
+    build: .
+    container_name: hmcts-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hmcts_db
+      SPRING_DATASOURCE_USERNAME: my_user
+      SPRING_DATASOURCE_PASSWORD: my_password
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - hmcts-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  hmcts-network:
+    driver: bridge
