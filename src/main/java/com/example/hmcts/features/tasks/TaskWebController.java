@@ -36,6 +36,24 @@ public class TaskWebController {
         List<TaskResponseDto> tasks = taskService.getAllTasks();
         model.addAttribute("tasks", tasks);
         model.addAttribute("taskStatuses", TaskStatus.values());
+        model.addAttribute("title", "All Tasks");
+        return "tasks/list";
+    }
+
+    /**
+     * Display tasks filtered by status
+     */
+    @GetMapping("/status/{status}")
+    public String getTasksByStatus(@PathVariable TaskStatus status, Model model){
+        log.info("Displaying tasks with status: {}", status);
+        List<TaskResponseDto> allTasks = taskService.getAllTasks();
+        List<TaskResponseDto> filteredTasks = allTasks.stream()
+                .filter(task -> task.getStatus() == status)
+                .collect(Collectors.toList());
+        
+        model.addAttribute("tasks", filteredTasks);
+        model.addAttribute("taskStatuses", TaskStatus.values());
+        model.addAttribute("title", status.getDisplayName() + " Tasks");
         return "tasks/list";
     }
 
@@ -48,7 +66,7 @@ public class TaskWebController {
         TaskRequestDto taskRequestDto = TaskRequestDto.builder().status(TaskStatus.PENDING).build();
         model.addAttribute("taskRequestDto", taskRequestDto);
         model.addAttribute("taskStatuses", TaskStatus.values());
-        return "task/form";
+        return "tasks/form";
     }
 
     /**
@@ -69,7 +87,7 @@ public class TaskWebController {
         if(bindingResult.hasErrors()){
             log.warn("Validation errors in task creation: {} ", bindingResult.getAllErrors());
             model.addAttribute("taskStatuses", TaskStatus.values());
-            return "task/form";
+            return "tasks/form";
         }
 
         try{
@@ -97,7 +115,7 @@ public class TaskWebController {
             model.addAttribute("taskRequestDto", taskRequestDto);
             model.addAttribute("taskId", id);
             model.addAttribute("taskStatuses", TaskStatus.values());
-            return "task/form";
+            return "tasks/form";
         } catch (TaskNotFoundException e) {
             log.warn("Task not found: {} ", id);
             redirectAttributes.addFlashAttribute("errorMessage", "Task not found");

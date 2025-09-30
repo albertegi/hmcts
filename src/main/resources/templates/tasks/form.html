@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${taskId != null} ? 'Edit Task' : 'Create Task'">Create Task</title>
+    <th:block th:replace="~{layout :: head}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout :: navbar}"></th:block>
+
+<main class="container mt-4">
+    <th:block th:replace="~{layout :: flash-messages}"></th:block>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-pencil-square me-2"></i>
+                <span th:text="${taskId != null} ? 'Edit Task' : 'Create New Task'">Create New Task</span>
+            </h1>
+        </div>
+        <div class="col-auto">
+            <a href="/tasks" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Tasks
+            </a>
+        </div>
+    </div>
+
+    <!-- Task Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form th:action="${taskId != null} ? @{/tasks/{id}(id=${taskId})} : @{/tasks}"
+                          th:object="${taskRequestDto}" method="post">
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">
+                                <i class="bi bi-card-text me-1"></i>Title *
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:class="${#fields.hasErrors('title')} ? 'form-control is-invalid' : 'form-control'"
+                                   id="title"
+                                   th:field="*{title}"
+                                   placeholder="Enter task title"
+                                   maxlength="255">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}">
+                                <span th:errors="*{title}">Title error</span>
+                            </div>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="bi bi-file-text me-1"></i>Description
+                            </label>
+                            <textarea class="form-control"
+                                      th:class="${#fields.hasErrors('description')} ? 'form-control is-invalid' : 'form-control'"
+                                      id="description"
+                                      th:field="*{description}"
+                                      rows="4"
+                                      placeholder="Enter task description (optional)"
+                                      maxlength="1000"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}">
+                                <span th:errors="*{description}">Description error</span>
+                            </div>
+                            <div class="form-text">Optional field. Maximum 1000 characters.</div>
+                        </div>
+
+                        <!-- Status Field -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label">
+                                <i class="bi bi-flag me-1"></i>Status *
+                            </label>
+                            <select class="form-select"
+                                    th:class="${#fields.hasErrors('status')} ? 'form-select is-invalid' : 'form-select'"
+                                    id="status"
+                                    th:field="*{status}"
+                                    required>
+                                <option value="">Select status</option>
+                                <option th:each="status : ${taskStatuses}"
+                                        th:value="${status}"
+                                        th:text="${status.displayName}">Status</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}">
+                                <span th:errors="*{status}">Status error</span>
+                            </div>
+                        </div>
+
+                        <!-- Due Date Field -->
+                        <div class="mb-3">
+                            <label for="dueDate" class="form-label">
+                                <i class="bi bi-calendar-event me-1"></i>Due Date & Time *
+                            </label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   th:class="${#fields.hasErrors('dueDate')} ? 'form-control is-invalid' : 'form-control'"
+                                   id="dueDate"
+                                   th:field="*{dueDate}"
+                                   th:value="${taskRequestDto.dueDate != null} ? ${#temporals.format(taskRequestDto.dueDate, 'yyyy-MM-dd''T''HH:mm')} : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('dueDate')}">
+                                <span th:errors="*{dueDate}">Due date error</span>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/tasks" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span th:text="${taskId != null} ? 'Update Task' : 'Create Task'">Create Task</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-info-circle me-1"></i>Task Status Guide
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small">
+                                <li><span class="badge bg-warning me-2">Pending</span>Task is waiting to be started</li>
+                                <li><span class="badge bg-info me-2">In Progress</span>Task is currently being worked on</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small">
+                                <li><span class="badge bg-success me-2">Completed</span>Task has been finished</li>
+                                <li><span class="badge bg-danger me-2">Cancelled</span>Task has been cancelled</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{layout :: footer}"></th:block>
+<th:block th:replace="~{layout :: scripts}"></th:block>
+
+<script>
+    // Set minimum date to current date/time
+    document.addEventListener('DOMContentLoaded', function() {
+        const dueDateInput = document.getElementById('dueDate');
+        if (dueDateInput && !dueDateInput.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            dueDateInput.min = now.toISOString().slice(0, 16);
+        }
+    });
+</script>
+</body>
+</html>
